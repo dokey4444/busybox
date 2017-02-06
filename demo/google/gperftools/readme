@@ -1,0 +1,25 @@
+学习使用tcmalloc以及Heap Profiler的用法
+
+源码路径：https://github.com/gperftools/gperftools.git
+git clone https://github.com/gperftools/gperftools.git
+
+编译安装：
+cd gperftools
+sh autogen.sh
+./configure --prefix=`pwd`
+make
+make insatll
+
+heap-checker:检查是否存在内存泄漏
+export PPROF_PATH=./gperftools/bin/pprof
+env HEAPCHECK=normal ./test
+
+heap-profiler:定位内存泄漏（编译静态库无法使用heap-profiler，必须使用动态库才可以）
+env HEAPPROFILE=./hprof ./test
+./gperftools/bin/pprof --text test hprof.0001.heap
+
+cpu-profiler:
+如果要使用cpu-profiler不仅要链接-ltcmalloc还要链接-lprofiler
+env CPUPROFILE=./cprof ./test
+./gperftools/bin/pprof --text test cprof
+

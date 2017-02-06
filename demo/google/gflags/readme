@@ -1,0 +1,7 @@
+1. download:
+git clone https://github.com/gflags/gflags.git
+
+2. build:
+cd gflags
+cmake .
+make

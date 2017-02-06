@@ -1,0 +1,23 @@
+1. download
+git clone https://github.com/google/protobuf.git
+
+2. build
+cd protobuf/
+(ln -s ../../gmock/googlemock/ ./gmock)	// need gmock first
+sh autogen.sh
+chmod +x configure
+./configure --prefix=`pwd`
+make
+make install
+
+3. another way to build
+cd protobuf
+ln -s ../../gmock/googletest/googlemock/ ./gmock
+cd gmock/gtest
+ln -s ../../../../gtest/googletest/googletest/src/ ./
+ln -s ../../../../gtest/googletest/googletest/include/ ./
+cd ../../cmake
+cmake .
+make
+编译后，项目makefile也无法直接使用，还需要构建目录，所以并不推荐这种build方式
+

@@ -1,0 +1,45 @@
+syntax = "proto2";
+
+package sample;
+
+// 官方文档: https://developers.google.com/protocol-buffers/docs/proto
+
+// 基础数据类型
+// 等号后面的数字叫做tag，不同field的tag值是惟一的
+// tag为1-15时，该字段使用单字节编码，tag为16-2048时，该字段使用双字节编码。应该把最常用的字段放到1-15编号内
+// 
+// 每个field有3种不同的rule
+// required: a well-formed message must have exactly one of this field.
+// optional: a well-formed message can have zero or one of this field (but not more than one).
+// repeated: this field can be repeated any number of times (including zero) in a well-formed message. The order of the repeated values will be preserved.
+// 官方建议：不使用required，只使用optional和repeated，以保证良好的兼容性
+message BasicType
+{
+	required bool     b    = 1 [default = false];
+	required int32    i32  = 2;	// Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.
+	required int64    i64  = 3;	// Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.
+	repeated float    f    = 4;
+	repeated double   d    = 5;
+	required string   s    = 6;	// A string must always contain UTF-8 encoded or 7-bit ASCII text.
+	optional bytes    bin  = 7;	// May contain any arbitrary sequence of bytes.
+	optional uint32   u32  = 8;	// Uses variable-length encoding.
+	optional uint64   u64  = 9;	// Uses variable-length encoding.
+	optional sint32   s32  = 10;	// Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.
+	optional sint64   s64  = 11;	// Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.
+	optional fixed32  f32  = 12;	// Always four bytes. More efficient than uint32 if values are often greater than 2^28.
+	optional fixed64  f64  = 13;	// Always eight bytes. More efficient than uint64 if values are often greater than 2^56.
+	optional sfixed32 sf32 = 14;	// Always four bytes.
+	optional sfixed64 sf64 = 15;	// Always eight bytes.
+
+	enum value {
+		SUCCESS = 0;	// 枚举值可以是0
+		FAILURE = 1;	// 枚举值不能是负值
+	}
+	optional value v = 16 [default = SUCCESS];
+}
+
+// message AdvancedType
+// {
+// 	map<int32, string> m = 1;
+// }
+

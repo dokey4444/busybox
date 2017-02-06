@@ -1,0 +1,17 @@
+1. download
+git clone https://github.com/google/googletest.git
+
+2. build
+cd googletest/
+
+cd googlemock/
+cmake .
+make
+
+cd googletest/
+cmake .
+make
+
+3. Todo
+Death Tests are not complete
+

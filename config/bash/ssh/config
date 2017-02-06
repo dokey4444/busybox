@@ -1,0 +1,7 @@
+# 克隆会话
+# -S 参数
+ControlMaster auto
+ControlPath ~/.ssh/%r@%h:%p
+
+# 每隔60秒主动通信，防止长时间无操作自动断开
+ServerAliveInterval 60

@@ -1,0 +1,12 @@
+1. downlaod glog:
+git clone https://github.com/google/glog.git
+
+2. build glog:
+cd glog
+cmake .
+make
+
+3.run
+make [debug]; ./debug
+make release; ./release
+

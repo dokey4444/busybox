@@ -1,0 +1,43 @@
+#!/usr/bin/python
+
+'''
+run: 'ssh-keygen -t rsa'
+every thing choose default(just enter)
+run 'cp  ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys' on local machine
+run 'scp ~/.ssh/id_rsa.pub username@server:.ssh/elwin.pub' on local machine
+run 'cat ~/.ssh/elwin.pub >> ~/.ssh/authorized_keys' on server
+run 'ssh-add ~/.ssh/id_rsa' on local machine
+that is all~~~~
+
+when it's not worked, try:
+1.chmod 700 ~/.ssh
+2.chmod 600 ~/.ssh/authorized_keys
+3.chmod go-wrx ~
+
+'''
+
+import sys
+import os
+
+ssh_map = {
+		'mine'	: 'elwin@192.168.32.164',	# passwd:
+		}
+
+if len(sys.argv) != 2:
+	print 'Usage: gssh server_name'
+	exit(0)
+
+if sys.argv[1] == 'init':
+	complete_argv = ''
+	for i in ssh_map.keys():
+		complete_argv += i
+		complete_argv += ' '
+	print 'complete -W "' + complete_argv + '" ' + sys.argv[0].split("/")[-1]
+	exit(0)
+
+if ssh_map.has_key(sys.argv[1]):
+	os.system('ssh ' + ssh_map[sys.argv[1]]);
+else:
+	print 'There are several suitable:'
+	for i in ssh_map.keys():
+		print i + '\t' + ssh_map[i]

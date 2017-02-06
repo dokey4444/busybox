@@ -1,0 +1,16 @@
+demo
+build a webservice using mongoose + ctemplate
+
+build mongoose
+git clone https://github.com/cesanta/mongoose.git
+cp mongoose/mongoose.* ./
+mv mongoose.c mongoose.cpp
+
+build ctemplate
+git clone https://github.com/OlafvdSpek/ctemplate.git
+cd ctemplate
+sh autogen.sh
+./configure --prefix=`pwd`
+make
+make install
+

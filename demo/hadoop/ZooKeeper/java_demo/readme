@@ -1,0 +1,2 @@
+javac -cp ../zookeeper/zookeeper-3.4.8.jar main.java
+java -cp .:../zookeeper/zookeeper-3.4.8.jar:../zookeeper/lib/slf4j-api-1.6.1.jar:../zookeeper/lib/slf4j-log4j12-1.6.1.jar:../zookeeper/lib/log4j-1.2.16.jar main

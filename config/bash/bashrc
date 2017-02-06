@@ -1,0 +1,113 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# Start bash_completion
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+    . /etc/bash_completion
+fi
+
+# User specific aliases and functions
+alias vi='vim'
+alias view='vim -R'
+if [ "x$SYSTEM" == "xMac" ];then
+	alias ls='ls -G'
+else
+	alias ls='ls --color=auto'
+fi
+alias lsg='ls --group-directories-first'
+alias ll='ls -l'
+alias la='ls -A'
+alias l.='ls -d .*'
+alias lsd='ls -d */'
+alias l='ls -CF'
+alias mv='mv -iv'
+alias cp='cp -iv'
+alias del='\rm -iv'
+rm=`which trash-put 2>/dev/null`
+if [ -z $rm ];then
+	mkdir -p ~/.local/share/Trash/files
+#	alias rm='mv -f -t ~/.local/share/Trash/files --backup=nil'
+	alias rm='mv -f --target-directory ~/.local/share/Trash/files --backup=nil'
+	alias rmls='ls ~/.local/share/Trash/files'
+	alias rm-clean='\rm -rf ~/.local/share/Trash/files/*'
+else
+	alias rm='trash-put'
+	alias rmls='trash-list'
+	alias rrm='restore-trash'
+	alias rm-clean='trash-empty'
+fi
+alias cdtrash='cd ~/.local/share/Trash/files'
+alias grep='grep --color -i -n'
+alias fgrep='fgrep --color -i -n'
+#alias tee='tee -a'
+alias top='top -s'
+alias diff='diff -b -B'
+alias diffdir='diff -ruNa --brief'
+#alias apt='apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/"'
+alias rsync='rsync -avzP'
+alias watch='watch -d -n 1'
+alias wget-dir='wget -c -r -np -nd'
+alias java-proxy='java -jar -Xms1024M -Xmx1024M -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=8087'
+
+#--------------------------------------------------------------
+
+alias as='as -gstabs'
+# alias cc='gcc -ansi -pedantic -Wall -Wextra -Wc++-compat -Wconversion -g3'
+# alias ccp='g++ -ansi -pedantic -Wall -Wextra -Wc++0x-compat -Wconversion -g3'
+alias cc='gcc -Wall -Wextra -g3'
+alias ccp='g++ -Wall -Wextra -g3'
+alias ar='ar crv'
+alias ctags='ctags --c++-kinds=+p --fields=+iaS --extra=+q+f --tag-relative=yes --languages=C++ --exclude=.svn'
+
+#alias gdb='gdb | tee ~/temp/gdb.out'
+# the other way to make gdb log:
+# set set logging on
+# set set logging off
+# set set logging file FILE
+
+#--------------------------------------------------------------
+
+# Set dir_colors
+if [ -f ~/.dir_colors ];
+then
+	eval $(dircolors ~/.dir_colors)
+else
+	export LS_COLORS='di=01;34'
+fi
+
+# specified environment variable
+# export LANG=en_US.UTF-8
+export LD_LIBRARY_PATH='./'
+export HISTTIMEFORMAT='%F %T '
+export HISTCONTROL=erasedups
+export TIMEFORMAT=$'\nRealTime=%3lR  UserTime=%3lU  SysTime=%3lS  CPU=%P%%'
+
+# DIY bash prompt
+# export PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$'	# default of PS1
+# $LINES: 当前终端行数	$COLUMNS: 当前终端列数
+# ip=`ifconfig | grep -A1 "eth0\|wlan0" | fgrep inet | cut -d ":" -f 2 | cut -d " " -f 1 | xargs | sed "s/ / \& /g"`
+# ip=${ip:=0.0.0.0}
+host=$(hostname)
+if [ $LANG = 'en_US.UTF-8' ]; then
+	export PS1='`ret=$?; if [ $ret -ne 0 ];then echo "\[\e[31m\]error code: $ret\n\[\e[0m\]"; fi`\[\e[36m\]╔════\[\e[37m\]($host)\[\e[36m\]══`for((i=0;i<$COLUMNS-39-${#host};++i));do echo -n ═;done` \[\e[1m\e[33m\]$(date +"%a %F %T")\[\e[0m\e[36m\] ════╗\n\[\e[36m\]╠\[\e[0m\]\W\$ '
+	export PS2='\[\e[36m\]╠\[\e[0m\]\W\$ '
+else
+	export PS1='`ret=$?; if [ $ret -ne 0 ];then echo "\[\e[31m\]error code: $ret\n\[\e[0m\]"; fi`\[\e[36m\]|----\[\e[37m\]($host)\[\e[36m\]--`for((i=0;i<$COLUMNS-39-${#host};++i));do echo -n -;done` \[\e[1m\e[33m\]$(date +"%a %F %T")\[\e[0m\e[36m\] ----|\n\[\e[36m\]|\[\e[0m\]\W\$ '
+	export PS2='\[\e[36m\]|\[\e[0m\]\W\$ '
+fi
+
+# set umask
+umask 022
+
+# others
+ulimit -c unlimited
+
+alias mplayer='mplayer -shuffle -loop 0'
+alias update='source ~/.bashrc'
+
+# xmodmap -e "keycode 135 = XF86WakeUp"
+

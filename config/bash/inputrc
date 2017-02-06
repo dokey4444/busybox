@@ -1,0 +1,9 @@
+# do not show hidden files in the list
+# 关掉 match-hidden-files 不显示隐藏文件，特别是当你在 home 目录时，你会觉得眼前好干净。
+set match-hidden-files off
+ 
+# auto complete ignoring case
+# 默认情况下，按下两次 <tab> 才会出现提示，show-all-if-ambiguous 开启后，只需要一次了。
+#set show-all-if-ambiguous on	
+# 开启 completion-ignore-case 忽略大小写
+set completion-ignore-case on

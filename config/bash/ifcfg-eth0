@@ -1,0 +1,17 @@
+# Intel Corporation 82577LM Gigabit Network Connection
+DEVICE=eth0			# 接口名称
+HWADDR=F0:DE:F1:15:BA:39	# MAC地址
+# IPADDR=192.168.2.45		# IP地址
+# NETMASK=255.255.255.0		# 网络掩码
+# NETWORK=192.168.2.0		# 网络地址
+# BROADCAST=192.168.1.255		# 广播地址
+# GATEWAY=192.168.2.1		# 网关地址
+
+# ONBOOT=no			# 是否开机启动该设备
+# BOOTPROTO=none			# 配置协议，四选一：static、dhcp、bootp、none（手动）
+# TYPE=Ethernet			# 网络类型:通常都是Ethernet
+# DEFROUTE=yes			# 是否将给设备设置为默认路由
+# PEERDNS=yes			# 是否使用与dhcp协商的DNS替代/etc/resolv.conf文件中的配置信息
+# PEERROUTES=yes			# 是否使用与dhcp协商的route信息替代当前文件中或是/etc/sysconfig/network文件中的路由配置信息
+
+# USERCTL=no			# 非root用户能否控制该设备

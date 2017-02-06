@@ -1,0 +1,263 @@
+# git的三种帮助文档：
+# git help <verb>
+# git <verb> --help
+# man git-<verb>
+
+# git config --list可以查看当前全部配置（全局配置+项目配置）
+
+[user]
+	# git config --global user.name "Elwin.Gao"
+	# git config --global user.email Elwin.Gao4444@gmail.com
+	name = dokey4444
+	email = elwin.gao4444@gmail.com
+[core]
+	# git config --global core.editor vim
+	editor = vim
+[alias]
+	st = status -s			# 单行简化状态显示
+
+	undo = checkout --		# index to work，撤销work的操作。注意：“--”很重要，如果没有就变成了checkout到某个分支
+	save = stage			# work to index，和add的作用一样
+	unsave = reset --		# HEAD to index，撤销index的暂存。"reset HEAD --" 和 "reset HEAD"与之等效
+	rework = reset --hard HEAD 	# HEAD to index to work，撤销work和index的一切修改，全部更新到HEAD状态
+	# more:可以用其他版本名（或版本ID）替换HEAD达到更高级的效果
+	# HEAD表示当前版本
+	# HEAD^表示上一个版本，HEAD^^表示上两个版本
+	# HEAD~100表示上100个版本
+
+	ci = commit			# index to HEAD 提交index暂存到版本库
+	ciall = commit -a		# work to index to HEAD，相当与save + ci，但要注意此操作只对修改文件有效，对新增文件无效
+	reci = commit --amend		# 增量提交，将新的修改并入现有HEAD，而不新增版本
+
+	br = branch
+	co = checkout
+	brdel = branch -d
+	brnew = checkout -b
+
+	df = diff			# work  diff index
+	dfindex = diff --staged		# index diff HEAD, "diff --cached"与之等效
+	dfhead = diff HEAD		# work  idff HEAD
+
+	log-tree   = log --oneline --decorate --graph
+	log-forest = log --oneline --decorate --graph --all
+	logs     = log --abbrev-commit --relative-date --decorate --shortstat
+	log-st   = log --abbrev-commit --relative-date --decorate --name-status
+	log-stat = log --abbrev-commit --relative-date --decorate --stat
+	last     = log --abbrev-commit --relative-date --decorate --stat -1 HEAD
+	# more: log常用参数说明：
+	# --online = --pretty=oneline --abbrev-commit 单行短ID显示
+	# --abbrev-commit: 短ID
+	# --decorate: 显示HEAD及分支标记
+	# --graph: 以ACSII的方式图形显示分支及合并关系
+	# --all: 显示所有分支的log，默认只显示当前分支的log
+	# --shortstat: 显示文件变化的统计摘要（几个文件发生变动，一共增加了几行，删除了几行）
+	# --name-status: 显示文件list及其状态标记（A or D or M）
+	# --stat: 显示文件list以及每个文件的统计信息（每个文件增加了几行，删除了几行）
+	# --relative-date: 采用相对时间取代绝对时间（例如: 2 hours ago）
+	# -n: 只显示最近的n条记录
+[http]
+#	proxy = 127.0.0.1:8087
+	sslVerify = false
+[https]
+#	proxy = 127.0.0.1:8087
+	sslVerify = false
+[merge]
+	tool = vimdiff
+[color]
+	ui = true
+	status = auto
+	branch = auto
+	interactive = auto
+	diff = auto
+
+# **************************************************************** #
+# **************************************************************** #
+#                        GIT-DOC from                              #
+#                 http://git-scm.com/book/en/v2/                   #
+#                 http://git-scm.com/book/zh/v1/                   #
+# **************************************************************** #
+# **************************************************************** #
+
+# *****************************************
+# 2.1 Git Basics - Getting a Git Repository
+# *****************************************
+#
+# git init 初始化本地git版本管理库
+# git add *.c 添加程序到index暂存
+# git add LICENSE 为程序添加许可证
+# git commit -m 'initial project version'提交到本地库
+#
+# git clone https://github.com/libgit2/libgit2 从现有的远程版本库中将版本库复制到本地
+# git clone https://github.com/libgit2/libgit2 mylibgit
+
+# ****************************************************
+# 2.2 Git Basics - Recording Changes to the Repository
+# ****************************************************
+#
+# git status 查看文件状态
+# git status --short(git status -s) 可以查看简明状态
+#
+# .gitignore 这个可以在add时对文件进行过滤，详见：https://github.com/github/gitignore
+#
+# git diff 可以查看work和index的diff
+# git diff --staged 可以查看index和HEAD之间的diff
+# git difftool可以取代git diff做可编辑diff，例如vimdiff
+#
+# git commit 提交本地数据(work)到暂存区(index)
+# git commit -m 在提交时加入一行说明，没有参数会进入编辑模式，可编写详细说明
+# git commit -a 可以跳过stage阶段，直接从work提交到HEAD，stage阶段会自动完成
+#
+# git rm 将文件从版本库中删除，并删除磁盘文件
+# git rm --cached README 将文件从版本库中删除，并保留磁盘文件
+#
+# git mv file_from file_to 用mv命令为文件重命名，这个命令等效于先rm再add
+
+# ****************************************************
+# 2.3 Git Basics - Viewing the Commit History
+# ****************************************************
+#
+# git log 可以查看git的历史版本
+#
+# git log -p 2 其中-p表示显示历史记录中文件修改的diff，-2表示只显示最近的两个版本
+# git log --stat 展示各个版本之间哪些文件被改动过，但不显示diff的细节
+#
+# git log --pretty=oneline
+# git log --pretty=short
+# git log --pretty=full
+# git log --pretty=fuller
+# 上述四个选项，log的信息从少到多
+#
+# git log --pretty=format:"%h - %an, %ar : %s" 格式化显示，详见man-page或git-scm.com的在线DOC
+#
+# git log 的常用参数：
+# -p 展示版本间的patch
+# --stat 展示版本间的文件变化及其统计
+# --shortstat --stat除去统计部分的简短展示
+# --name-only 只显示改动文件的文件名
+# --name-status 显示改动文件的修改状态
+# --abbrev-commit 只显示commit id的前几个字节
+# --relative-date 将时间展示为相对时间，而非绝对时间
+# --graph 图形化显示分支与合并的信息
+# --pretty 个性化格式输出
+#
+# git log -n 指定一个数字，表示只显示前n个版本
+# git log --since=2.weeks 展示从某个时间开始到现在的所有版本
+# git log --until 显示从最初版本到某个时间点的所有版本
+# 说明：时间格式可以是形如："2008-01-15"或"2 years 1 day 3 minutes ago"，详见man-page
+# git log --author 对作者进行过滤
+# git log --grep 对commit message的关键词进行过滤
+# 说明：如果想同时过滤作者和关键字，就必须在add的时候使用--all-match选项
+# git log -S 对涉及修改某些代码的版本进行过滤
+
+# *******************************
+# 2.4 Git Basics - Undoing Things
+# *******************************
+#
+# git commit --amend 对当前版本进行增量commit
+# git reset HEAD <file> 撤销add的提交
+# git reset HEAD --hard <file> 撤销add的提交，并同时撤销本地文件的修改
+# git checkout -- 用index数据覆盖本地数据，放弃本地数据的修改
+
+# *************************************
+# 2.5 Git Basics - Working with Remotes
+# *************************************
+#
+# git remote 列举远程仓库名
+# git remote -v 列举远程仓库名，及其URL
+# git remote add [shortname] [url] 添加一个远程版本库，并为之起一个名字
+# git fetch pb 将远程版本库pb下载到本地（只下载不合并）
+# git pull 下载到本地并和当前本地数据进行merge
+# git push [remote-name] [branch-name] 将本地分支上传到远程版本库
+#
+# git remote show origin 查看远程版本库origin的远程分支
+#
+# git remote rename pb paul 将版本库pb改名为paul
+
+# ************************
+# 2.6 Git Basics - Tagging
+# ************************
+#
+# git tag 查看已有的tag标签
+# git tag -l 'v1.8.5*' 查看指定前缀的标签
+# git tag -a v1.4 -m 'my version 1.4' 创建一个tag，并为止增加说明
+# git show v1.4 查看v1.4的详细信息
+# git tag v1.4-lw 创建一个轻量级标签（所谓轻量级标签，就是没有-a -s -m这些选项）
+# git tag -a v1.2 9fceb02 为一个已有的版本打上标签
+# git push origin [tagname] 在远程仓库中同步标签，默认情况下，标签是不是自动同步到远程仓库的
+# git push origin --tags 自动同步所有标签到远程仓库
+# git checkout -b version2 v2.0.0 并从远端下载tag为v2.0.0的版本，并作为新建分支version2
+
+# ****************************
+# 2.7 Git Basics - Git Aliases
+# ****************************
+#
+# 以下是git-scm的DOC中推荐的一些alias和配置
+#
+# git config --global alias.co checkout
+# git config --global alias.br branch
+# git config --global alias.ci commit
+# git config --global alias.st status
+#
+# git config --global alias.unstage 'reset HEAD --'
+# git config --global alias.last 'log -1 HEAD'
+# git config --global alias.visual "!gitk"
+
+# ******************************************
+# 3.1 Git Branching - Branches in a Nutshell
+# ******************************************
+#
+# git branch testing 创建一个新的分支（注意，只是创建，并没有切换分支）
+# git log --oneline --decorate 其中--decorate用于展示branch以及HEAD位置信息
+#
+# git checkout testing 切换分支
+#
+# git log --oneline --decorate --graph --all 其中--all表示显示所有分支的log。（默认情况下只显示当前分支的信息）
+
+# ***********************************************
+# 3.2 Git Branching - Basic Branching and Merging
+# ***********************************************
+#
+# git merge hotfix 将hotfix分支合并到当前分支
+# git branch -d hotfix 将hotfix分支删除
+# git mergetool 使用mergetool进行冲突修改
+
+# *************************************
+# 3.3 Git Branching - Branch Management
+# *************************************
+#
+# git branch -v 查看每个分支的最后一次提交版本信息
+#
+# git branch --merged 查看已经合并的分支
+# git branch --no-merged 查看还没有合并的分支
+
+# ***************************************
+# 3.4 Git Branching - Branching Workflows
+# ***************************************
+#
+# 本章主要讲的是一些常用的使用模式
+#
+# 1、Long-Running Branches
+# 该模式为一个线性模式，逻辑上无分支
+# 该模式的做法为topic分支完成就merge到develop
+# develop测试完成就merge到master
+# 这是一个单线开发模式，适用于个人开发
+#
+# 2、Topic Branches
+# 该模式为一个n to 1的开发模式，多个分支最后合并到一个master中
+# 这个模式适合多人并行开发，或者一边开发一遍修复bug
+
+# ***********************************
+# 3.5 Git Branching - Remote Branches
+# ***********************************
+#
+# git checkout --track origin/serverfix 从远端checkout下来一个本地永久分支（如果没有--track则建立的是临时分支，checkout到其他分支后，该临时分支自动删除）
+# git checkout -b sf origin/serverfix 下载远程分支到新的本地分支，并为它重命名（该命令可替换--track的功能）
+#
+# 其他高级功能...
+
+# ****************************
+# 3.6 Git Branching - Rebasing
+# ****************************
+#
+# rebase高级功能...
+

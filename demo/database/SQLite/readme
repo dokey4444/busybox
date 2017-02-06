@@ -1,0 +1,17 @@
+Office Website: http://www.sqlite.org
+
+1、download
+wget http://www.sqlite.org/2016/sqlite-autoconf-3130000.tar.gz
+tar -xzvf tar -xzvf sqlite-autoconf-3130000.tar.gz
+mv sqlite-autoconf-3130000 sqlite
+
+2、build
+cd sqlite
+./configure --prefix=`pwd`
+make
+make install
+
+3、run
+make
+sh run.sh
+

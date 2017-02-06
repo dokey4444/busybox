@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -e ~/temp/goagent.out ]; then
+	rm -f ~/temp/goagent.out
+	ps -ef | grep '[P]ublic/goagent/local/proxy.py' | awk '{print $2}' | xargs -t kill
+	echo killed goagent...
+fi
+
+python ~/Public/goagent/local/proxy.py > ~/temp/goagent.out 2>&1 &
+# python ~/Public/goagent/local/proxy.py > /dev/null 2>&1 &
+echo "goagent($!) started..."
+

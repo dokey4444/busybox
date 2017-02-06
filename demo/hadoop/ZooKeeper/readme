@@ -1,0 +1,61 @@
+Zookeeper官网：https://zookeeper.apache.org/
+
+当前使用版本：Release 3.4.8(stable)
+下载路径：http://mirrors.gigenet.com/apache/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz
+Doc地址：https://zookeeper.apache.org/doc/r3.4.8/
+
+1、download
+wget http://mirrors.gigenet.com/apache/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz
+tar -xzvf zookeeper-3.4.8.tar.gz
+ln -s zookeeper-3.4.8 zookeeper
+
+2、config
+cd zookeeper
+vi conf/zoo.cfg	//create new file
+write follow text:
+tickTime=2000	//the basic time unit in milliseconds used by ZooKeeper. It is used to do heartbeats and the minimum session timeout will be twice the tickTime.
+dataDir=/tmp/zookeeper/data	// the location to store the in-memory database snapshots and, unless specified otherwise, the transaction log of updates to the database.
+clientPort=2181	// the port to listen for client connections
+
+3、start server
+./bin/zkServer.sh start
+
+4、use client
+./bin/zkCli.sh -server 127.0.0.1:2181	// java way
+注意：java版本至少在1.6以上，java版本过低无法使用当前版本的Zookeeper
+
+5、build c src
+cd src/c
+./configure --prefix=`pwd`
+make
+make install
+
+6、run
+LD_LIBRARY_PATH=. ./cli_mt 127.0.0.1:2181
+or
+LD_LIBRARY_PATH=. ./cli_st 127.0.0.1:2181
+
+配置java环境
+安装或下载对应的java程序包
+并在~/.bashrc中增加以下环境变量
+export JAVA_HOME=/home/opt/java6
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$PATH:$JAVA_HOME/bin
+export CLASSPATH=$JAVA_HOME/lib
+
+阅读源代码：
+由于Apache针对C的接口和API说明比较少，所以更多的是参照头文件和源代码
+头文件参考：ZOOKEEPER_ROOT/src/c/include/zookeeper.h
+client源码：ZOOKEEPER_ROOT/src/c/src/cli.c
+
+----------------------------------------------------------------------------------------------------
+zookeeper c api list: grep '^ZOOAPI' zookeeper.h
+所有zookerp的c api都是以ZOOAPI定头书写的
+
+----------------------------------------------------------------------------------------------------
+C++模拟Java接口封装：c++_lib
+gtest+tcmalloc方式进行单元测试和内存检查：
+cd c++_lib
+git clone https://github.com/google/googletest.git && build gtest
+git clone https://github.com/gperftools/gperftools.git && build tcmalloc
+

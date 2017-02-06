@@ -1,0 +1,36 @@
+#!/bin/sh
+
+SMAPILOCK=/var/lock/tp_smapi_lock
+start()
+{
+	echo "Starting tm_smapi service:"
+	/sbin/modprobe -q hdaps
+	/sbin/modprobe -q tp_smapi
+	echo 60 > /sys/devices/platform/smapi/BAT0/start_charge_thresh
+	echo 100 > /sys/devices/platform/smapi/BAT0/stop_charge_thresh
+	touch $SMAPILOCK
+	echo "tm_smapi service started..."
+}
+stop()
+{
+	echo "Stopping tm_smapi service:"
+	/sbin/modprobe -q tp_smapi
+	rm -f $SMAPILOCK
+	echo "tm_smapi service stopped..."
+}
+case $1 in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac

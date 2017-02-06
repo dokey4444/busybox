@@ -1,0 +1,36 @@
+# 解决screen环境下GBK中文乱码的问题                                         
+# defencoding GBK
+# encoding UTF-8 GBK
+defutf8 on
+defencoding utf8
+encoding UTF-8 UTF-8
+
+# bind F1 to new a screen session in this terminal
+bindkey -k k5 screen
+# bind F2 to rename a screen
+bindkey -k k6 title
+# bind F4 to move to previous window
+bindkey -k k8 prev
+# bind F3 to go to screen window.
+bindkey -k k9 next
+# bind F5 to detach
+bindkey -k k7 detach
+
+#term linux # 这个配置导致你的 F1 至 F4 被屏蔽了
+#setenv TERM linux
+#setenv LC_CTYPE zh_CN.GBK
+#use ` as the Global Key
+defscrollback 4096
+
+hardstatus alwayslastline
+hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{=kw}%?%-Lw%?%{r}(%{W}%n*%f %t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B}%Y-%m-%d %{W}%c %{g}]'
+
+#screen -t xuxia 1 sh ~work/xx/.bashrc
+#screen -t server       2       ssh tc-rank-con1.tc
+vbell off
+#screen bash
+#screen bash
+#screen bash
+#screen bash
+#screen bash
+
