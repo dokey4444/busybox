@@ -23,6 +23,14 @@
 #include <stdio.h>
 #include <gflags/gflags.h>
 
+// DECLARE_类型(变量名)
+DECLARE_bool(arg_bool);
+DECLARE_int32(arg_int32);
+DECLARE_int64(arg_int64);
+DECLARE_uint64(arg_uint64);
+DECLARE_double(arg_double);
+DECLARE_string(arg_string);
+
 // DEFINE_类型(变量名, 默认值, 说明)
 DEFINE_bool(arg_bool, true, "arg_bool comment");
 DEFINE_int32(arg_int32, 32, "arg_int32 comment");
