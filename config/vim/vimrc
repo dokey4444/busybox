@@ -30,19 +30,19 @@ set cc=100		" 列标
 "--------------------------------------------------------------------------
 "	格式化显示（需要set list才能正常显示）
 "--------------------------------------------------------------------------
-" 显式输出tab和空格
-"set list
-" 设置tab和空格样式
-set lcs=tab:\|\ ,trail:-
-" 对普通空白符不着色
-highlight Whitespace ctermfg=none guifg=none
-match Whitespace /\s\+/
-" 对行首tab着灰色
-highlight LeaderTab ctermfg=grey guifg=grey
-2match LeaderTab /^\t\+/
-" 对行尾空白符着红色
-highlight WhitespaceEOL ctermfg=red guifg=red
-3match WhitespaceEOL /\s\+$/
+"" 显式输出tab和空格
+""set list
+"" 设置tab和空格样式
+"set lcs=tab:\|\ ,trail:-
+"" 对普通空白符不着色
+"highlight Whitespace ctermfg=none guifg=none
+"match Whitespace /\s\+/
+"" 对行首tab着灰色
+"highlight LeaderTab ctermfg=grey guifg=grey
+"2match LeaderTab /^\t\+/
+"" 对行尾空白符着红色
+"highlight WhitespaceEOL ctermfg=red guifg=red
+"3match WhitespaceEOL /\s\+$/
 
 "--------------------------------------------------------------------------
 "	字符编码
