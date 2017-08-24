@@ -1,5 +1,6 @@
 # 克隆会话
 # -S 参数
+ControlPersist yes
 ControlMaster auto
 ControlPath ~/.ssh/%r@%h:%p
 
