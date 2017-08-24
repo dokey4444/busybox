@@ -49,7 +49,9 @@ alias as='as -gstabs'
 alias cc='gcc -Wall -Wextra -g3'
 alias ccp='g++ -Wall -Wextra -g3'
 alias ar='ar crv'
-alias ctags='ctags --c++-kinds=+p --fields=+iaS --extra=+q+f --tag-relative=yes --languages=C++ --exclude=.svn'
+alias ctags='\ctags'
+alias ctags-c='ctags --c-kinds=+p --fields=+S --links=yes --languages=c --langmap=c:+.h --file-scope=yes -I __THROW'
+alias ctags-c++='ctags --c++-kinds=+p --fields=+iaS --extra=+q+f --tag-relative=yes --languages=c++ --exclude=.svn'
 
 #alias gdb='gdb | tee ~/temp/gdb.out'
 # the other way to make gdb log:
