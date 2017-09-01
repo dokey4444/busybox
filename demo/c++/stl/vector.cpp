@@ -3,7 +3,7 @@
 // 
 //       Filename:  vector.cpp
 // 
-//    Description:  
+//    Description:  vector是一种数组结构
 // 
 //        Version:  1.0
 //        Created:  09/01/2017 02:39:58 PM
@@ -46,6 +46,42 @@ int main(int argc, char *argv[])
 	// 无论哪种方式，一次大量写入，都会造成内存不足，从而需要不停的扩展空间，以及反复拷贝的问题
 	std::cout << "vec.reserve(100): " << std::endl;
 	vec.reserve(100);
+	std::cout << "vec.size(): " << vec.size() << std::endl;
+	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
+	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
+	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
+	std::cout << std::endl;
+
+	// resize
+	// resize的含义是调整vector中数据的数量，而不会调整内容的使用量
+	// 在vector中内存一般总之持续上涨而不会下降的
+	std::cout << "vec.resize: " << std::endl;
+	for (int i = 0; i < 10; ++i) {
+		vec.push_back(i);
+	}
+	std::cout << "vec.size(): " << vec.size() << std::endl;
+	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
+	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
+	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
+
+	vec.resize(5);
+	std::cout << "vec.size(): " << vec.size() << std::endl;
+	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
+	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
+	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
+
+	vec.resize(20);
+	std::cout << "vec.size(): " << vec.size() << std::endl;
+	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
+	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
+	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
+
+	std::cout << std::endl;
+
+	// clear
+	// clear 和 vec.resize(0)表达的意思相同
+	std::cout << "vec.clear(): " << std::endl;
+	vec.clear();
 	std::cout << "vec.size(): " << vec.size() << std::endl;
 	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
 	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
