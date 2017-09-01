@@ -39,6 +39,15 @@ void output_even(int x)
 	}
 }
 
+void call2(int x, int y, const std::function<void(int, int)> &fun)
+{
+	fun(x, y);
+}
+
+void output_reverse(int x, int y) {
+	std::cout << "x = " << x << " y = " << y << std::endl;
+}
+
 /* 
 // ===  FUNCTION  ======================================================================
 //         Name:  main
@@ -63,6 +72,13 @@ int main(int argc, char *argv[])
 		}
 		std::cout << std::endl;
 	}
+
+	{
+		output_reverse(1, 2);
+		auto fun = std::bind(output_reverse, std::placeholders::_2, std::placeholders::_1);
+		call2(1, 2, fun);
+	}
+
 	return EXIT_SUCCESS;
 }				// ----------  end of function main  ----------
 
