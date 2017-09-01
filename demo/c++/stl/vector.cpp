@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
 	vec.reserve(100);
 	std::cout << "vec.size(): " << vec.size() << std::endl;
 	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
 	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 	std::cout << std::endl;
 
@@ -61,19 +60,16 @@ int main(int argc, char *argv[])
 	}
 	std::cout << "vec.size(): " << vec.size() << std::endl;
 	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
 	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 
 	vec.resize(5);
 	std::cout << "vec.size(): " << vec.size() << std::endl;
 	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
 	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 
 	vec.resize(20);
 	std::cout << "vec.size(): " << vec.size() << std::endl;
 	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
 	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 
 	std::cout << std::endl;
@@ -84,7 +80,6 @@ int main(int argc, char *argv[])
 	vec.clear();
 	std::cout << "vec.size(): " << vec.size() << std::endl;
 	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
 	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 	std::cout << std::endl;
 
@@ -93,10 +88,6 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < 1000; ++i) {
 		vec.push_back(i);
 	}
-	std::cout << "vec.size(): " << vec.size() << std::endl;
-	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
-	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 	std::cout << std::endl;
 
 	// pop_back
@@ -106,14 +97,11 @@ int main(int argc, char *argv[])
 		// 获取last element需要使用back()方法
 		vec.pop_back();
 	}
-	std::cout << "vec.size(): " << vec.size() << std::endl;
-	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
-	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 	std::cout << std::endl;
 
 	// insert
-	// insert需要借助迭代器，insert返回指向新节点首元素的迭代器
+	// insert需要借住迭代器，好处是所有容器的代码都是一致的
+	// insert返回指向新节点首元素的迭代器
 	// insert除了可以插入单个元素，还可以重复插入及范围插入
 	std::cout << "insert" << std::endl;
 	for (int i = 0; i < 1000; ++i) {
@@ -121,10 +109,6 @@ int main(int argc, char *argv[])
 		it = vec.insert(it, i);
 		assert(it == vec.begin());
 	}
-	std::cout << "vec.size(): " << vec.size() << std::endl;
-	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
-	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 	std::cout << std::endl;
 
 	// erase
@@ -137,10 +121,6 @@ int main(int argc, char *argv[])
 		it = vec.erase(it);
 		assert(it == vec.begin());
 	}
-	std::cout << "vec.size(): " << vec.size() << std::endl;
-	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
-	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 	std::cout << std::endl;
 
 	// swap
@@ -157,8 +137,6 @@ int main(int argc, char *argv[])
 	vec.swap(vec2);
 	std::cout << "vec.size(): " << vec.size() << std::endl;
 	std::cout << "vec.capacity(): " << vec.capacity() << std::endl;
-	std::cout << "vec.max_size(): "<< vec.max_size() << std::endl;
-	std::cout << "vec.empty(): "<< vec.empty() << std::endl;
 	std::cout << std::endl;
 
 	// element access
@@ -178,6 +156,7 @@ int main(int argc, char *argv[])
 	for (std::vector<int>::reverse_iterator it = vec.rbegin(); it != vec.rend(); ++it) {
 		std::cout << *it << " ";
 	}
+	std::cout << std::endl;
 	std::cout << std::endl;
 
 	// 关于下标和迭代器
