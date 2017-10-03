@@ -22,7 +22,6 @@
 #include <thread>
 #include <mutex>
 #include <future>
-#include <atomic>
 #include <condition_variable>
 #include <chrono>
 
@@ -222,13 +221,6 @@ int main(int argc, char *argv[])
 	std::unique_lock<std::mutex> lock5(mtx5, std::defer_lock);
 	std::unique_lock<std::mutex> lock6(mtx6, std::defer_lock);
 	std::lock(mtx4, mtx5, mtx6);	// 先guard后锁的方式
-
-	// 原子变量
-	// 原子变量的用法十分简单，但是接口众多，详细内容参考：
-	// http://en.cppreference.com/w/cpp/atomic/atomic
-	std::atomic<int> i(0);	// 原子变量的使用和普通int类型一样，基本没有差别
-	std::atomic<int> j(1);
-	i=1; ++i; --i; i+=2; i+=j;
 
 	// 条件变量的用法：
 	std::thread t_cond1(fun_cond1);
