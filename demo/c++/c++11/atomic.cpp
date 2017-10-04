@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
 
 #include <atomic>
 
@@ -105,6 +106,105 @@ int main(int argc, char *argv[])
 	std::cout << std::boolalpha << expected << std::endl;
 	std::cout << std::boolalpha << b << std::endl;
 	std::cout << "std::atomic<bool> ok" << std::endl;
+
+	// 6种内存序列
+	// Relaxed ordering: memory_order_relaxed
+	// 没有同步和顺序的制约，仅保证操作的原子性
+	// Relaxed ordering常用语shared_ptr，因为指针引用的增减，并不依赖于内存序
+	// 从CPU角度来看，memory_order_relaxed既不会影响乱序执行，也不会影响Cache一致
+	{
+		std::atomic<int> cnt = {0};
+		cnt.fetch_add(1, std::memory_order_relaxed);
+	}
+	
+	// Release-Consume ordering: memory_order_consume
+	// 当前线程依赖于该原子变量值的读写操作，不能被重排到此操作之前
+	// 其他线程对该原子变量的写入，在本线程可见
+	// 从CPU角度来看，memory_order_consume要求原子变量必须从内存读取
+	{
+		// Release-Consume ordering只关心原子变量本身的内存序，所以不能当做guard使用
+		std::atomic<std::string*> ptr;
+		int data;
+		// Thread Producer
+		{
+			std::string* p  = new std::string("Hello");
+			data = 42;
+			ptr.store(p, std::memory_order_release);
+		}
+		// Thread Consumer
+		{
+			std::string* p2;
+			while (!(p2 = ptr.load(std::memory_order_consume)));
+			assert(*p2 == "Hello");	// never fires: *p2 carries dependency from ptr
+			assert(data == 42);	// may or may not fire: data does not carry dependency from ptr
+		}
+	}
+
+	// Release-Acquire ordering: 
+	// memory_order_acquire:
+	// 当前线程中的读写操作不允许重排到该原子变量的acquire之前
+	// 其他release同一原子变量的全部写操作，对当前线程可见
+	// 从CPU角度来看，memory_order_acquire要求CPU清空读缓冲区，数据全部重新从内存加载
+	// memory_order_release:
+	// 当前线程中的读写操作不允许重排到该原子变量的release之前
+	// 当前线程所有写入，对其他acquire该原子变量的线程可见
+	// 当前线程对该原子变量的写入，对其他consume该原子变量的线程可见
+	// 从CPU角度来看，memory_order_release要求写缓冲全部同步到内存
+	// memory_order_acq_rel:
+	// 同时具有memory_order_acquire和memory_order_release的特征
+	{
+		// Release-Consume ordering只关心原子变量本身的内存序，所以不能当做guard使用
+		std::atomic<std::string*> ptr;
+		int data;
+		// Thread Producer
+		{
+			std::string* p  = new std::string("Hello");
+			data = 42;
+			ptr.store(p, std::memory_order_release);
+		}
+		// Thread Consumer
+		{
+			std::string* p2;
+			while (!(p2 = ptr.load(std::memory_order_acquire)));
+			assert(*p2 == "Hello");	// never fires
+			assert(data == 42);	// never fires
+		}
+	}
+
+	// Sequentially-consistent ordering: memory_order_seq_cst
+	// memory_order_seq_cst是memory_order_acq_rel的强化版
+	// memory_order_acq_rel只会对与当前修改的原子变量相关的线程产生作用
+	// memory_order_seq_cst会对所有线程都产生作用，无论这个线程是否使用了该原子变量
+	// 从CPU角度来看，其他memory_order_xxx只影响当前CPU，
+	// 而memory_order_seq_cst会强迫所有CPU同步写缓冲，并清空读缓冲
+	{
+		// 最终结果: z != 0
+		std::atomic<bool> x = {false};
+		std::atomic<bool> y = {false};
+		std::atomic<int> z = {0};
+		// Thread write_x
+		{
+			x.store(true, std::memory_order_seq_cst);
+		}
+		// Thread write_y
+		{
+			y.store(true, std::memory_order_seq_cst);
+		}
+		// Thread read_x_then_y
+		{
+			while (!x.load(std::memory_order_seq_cst));
+			if (y.load(std::memory_order_seq_cst)) {
+				++z;
+			}
+		}
+		// Thread read_y_then_x
+		{
+			while (!y.load(std::memory_order_seq_cst));
+			if (x.load(std::memory_order_seq_cst)) {
+				++z;
+			}
+		}
+	}
 
 	// 查看原子变量是否是lock free的
 	struct A { int a[100]; };
