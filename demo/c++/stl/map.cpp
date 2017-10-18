@@ -43,14 +43,17 @@ int main(int argc, char *argv[])
 	std::cout << "map.insert(): " << std::endl;
 	map.insert(std::pair<int, int>(1, 1));
 	std::cout << "map.size(): " << map.size() << std::endl;
-	// value_type形式
+	// value_type形式（最标准，最严谨的形式）
 	map.insert(std::map<int, int>::value_type(2, 2));
 	std::cout << "map.size(): " << map.size() << std::endl;
 	// make_pair形式
+	// make_pair虽然写法简洁，但使用模板类型推导，可能会出现类型推导不够准确的情况
+	// 例如：make_pair(1, 2.3)，second会被推导为double类型，而非float类型
 	map.insert(std::make_pair(3, 3));
 	std::cout << "map.size(): " << map.size() << std::endl;
 	// 花括号形式（C++11支持）
-	map.insert({4, 4});	// 本质上就是value_type形式的强制类型转换
+	// 本质上就是value_type形式的强制类型转换
+	map.insert({4, 4});
 	std::cout << "map.size(): " << map.size() << std::endl;
 	// 下标形式
 	map[5] = 5;
