@@ -46,6 +46,15 @@ int main(int argc, char *argv[])
 	// value_type形式
 	map.insert(std::map<int, int>::value_type(2, 2));
 	std::cout << "map.size(): " << map.size() << std::endl;
+	// make_pair形式
+	map.insert(std::make_pair(3, 3));
+	std::cout << "map.size(): " << map.size() << std::endl;
+	// 花括号形式（C++11支持）
+	map.insert({4, 4});	// 本质上就是value_type形式的强制类型转换
+	std::cout << "map.size(): " << map.size() << std::endl;
+	// 下标形式
+	map[5] = 5;
+	std::cout << "map.size(): " << map.size() << std::endl;
 	// 相同key会产生覆盖
 	map.insert(std::pair<int, int>(1, 1));
 	std::cout << "map.size(): " << map.size() << std::endl;
