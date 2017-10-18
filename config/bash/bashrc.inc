@@ -14,50 +14,38 @@ alias lsd='ls -d */'
 alias l='ls -CF'
 alias mv='mv -iv'
 alias cp='cp -iv'
-alias del='\rm -iv'
-rm=`which trash-put 2>/dev/null`
-if [ -z $rm ];then
-	mkdir -p ~/.local/share/Trash/files
-#	alias rm='mv -f -t ~/.local/share/Trash/files --backup=nil'
-	alias rm='mv -f --target-directory ~/.local/share/Trash/files --backup=nil'
-	alias rmls='ls ~/.local/share/Trash/files'
-	alias rm-clean='\rm -rf ~/.local/share/Trash/files/*'
-else
-	alias rm='trash-put'
-	alias rmls='trash-list'
-	alias rrm='restore-trash'
-	alias rm-clean='trash-empty'
-fi
-alias cdtrash='cd ~/.local/share/Trash/files'
+alias rm='rm -iv'
 alias grep='grep --color -i -n'
 alias fgrep='fgrep --color -i -n'
-#alias tee='tee -a'
+# alias tee='tee -a'
 alias top='top -s'
 alias diff='diff -b -B'
 alias diffdir='diff -ruNa --brief'
 alias watch='watch -d -n 1'
-#alias rsync='rsync -avzP'
-#alias apt='apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/"'
-#alias wget-dir='wget -c -r -np -nd'
-#alias java-proxy='java -jar -Xms1024M -Xmx1024M -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=8087'
+# alias rsync='rsync -avzP'
+# alias apt='apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/"'
+# alias wget-dir='wget -c -r -np -nd'
+# alias java-proxy='java -jar -Xms1024M -Xmx1024M -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=8087'
 
 #--------------------------------------------------------------
 
 alias as='as -gstabs'
 # alias cc='gcc -ansi -pedantic -Wall -Wextra -Wc++-compat -Wconversion -g3'
-# alias ccp='g++ -ansi -pedantic -Wall -Wextra -Wc++0x-compat -Wconversion -g3'
 alias cc='gcc -Wall -Wextra -g3'
+# alias ccp='g++ -ansi -pedantic -Wall -Wextra -Wc++0x-compat -Wconversion -g3'
 alias ccp='g++ -Wall -Wextra -g3'
 alias ar='ar crv'
 alias ctags='\ctags'
 alias ctags-c='ctags --c-kinds=+p --fields=+S --links=yes --languages=c --langmap=c:+.h --file-scope=yes -I __THROW'
 alias ctags-c++='ctags --c++-kinds=+p --fields=+iaS --extra=+q+f --tag-relative=yes --languages=c++ --exclude=.svn'
 
-#alias gdb='gdb | tee ~/temp/gdb.out'
+# alias gdb='gdb | tee ~/temp/gdb.out'
+################################
 # the other way to make gdb log:
 # set set logging on
 # set set logging off
 # set set logging file FILE
+################################
 
 #--------------------------------------------------------------
 
@@ -92,3 +80,4 @@ fi
 
 # set umask
 umask 022
+
