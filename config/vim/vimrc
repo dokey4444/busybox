@@ -21,6 +21,7 @@ syntax on		" 开启语法高亮
 colorscheme desert	" 自定义颜色方案（:help hi）
 set fdm=syntax		" 设置按照语法进行折叠
 set cursorline		" 设置光标所在行的行标记
+set cursorcolumn	" 设置光标所在列的列标记
 "set cinoptions=>s,e0,n0,f0,{0,}0,^0,:s,=s,l0,gs,hs,ps,ts,+s,c3,C0,(2s,us,\U0,w0,m0,j0,)20,*30	" 默认cinoption设置
 set cinoptions=g0,:0,t0	" 设置C++的public、protected和private关键字不缩进、以及case不缩进
 set ignorecase		" 查找时忽略大小写，简写为set ic
