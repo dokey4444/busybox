@@ -18,10 +18,12 @@ alias rm='rm -iv'
 alias grep='grep --color -i -n'
 alias fgrep='fgrep --color -i -n'
 # alias tee='tee -a'
-alias top='top -s'
 alias diff='diff -b -B'
 alias diffdir='diff -ruNa --brief'
 alias watch='watch -d -n 1'
+if [ "x$SYSTEM" == "xLinux" ];then
+	alias top='top -s'
+fi
 # alias rsync='rsync -avzP'
 # alias apt='apt-get -o Acquire::http::proxy="http://127.0.0.1:8087/"'
 # alias wget-dir='wget -c -r -np -nd'
@@ -35,9 +37,11 @@ alias cc='gcc -Wall -Wextra -g3'
 # alias ccp='g++ -ansi -pedantic -Wall -Wextra -Wc++0x-compat -Wconversion -g3'
 alias ccp='g++ -Wall -Wextra -g3'
 alias ar='ar crv'
-alias ctags='\ctags'
-alias ctags-c='ctags --c-kinds=+p --fields=+S --links=yes --languages=c --langmap=c:+.h --file-scope=yes -I __THROW'
-alias ctags-c++='ctags --c++-kinds=+p --fields=+iaS --extra=+q+f --tag-relative=yes --languages=c++ --exclude=.svn'
+if [ "x$SYSTEM" == "xLinux" ];then
+	alias ctags='\ctags'
+	alias ctags-c='ctags --c-kinds=+p --fields=+S --links=yes --languages=c --langmap=c:+.h --file-scope=yes -I __THROW'
+	alias ctags-c++='ctags --c++-kinds=+p --fields=+iaS --extra=+q+f --tag-relative=yes --languages=c++ --exclude=.svn'
+fi
 
 # alias gdb='gdb | tee ~/temp/gdb.out'
 ################################
@@ -70,7 +74,7 @@ export TIMEFORMAT=$'\nRealTime=%3lR  UserTime=%3lU  SysTime=%3lS  CPU=%P%%'
 # ip=`ifconfig | grep -A1 "eth0\|wlan0" | fgrep inet | cut -d ":" -f 2 | cut -d " " -f 1 | xargs | sed "s/ / \& /g"`
 # ip=${ip:=0.0.0.0}
 host=$(hostname)
-if [ $LANG = 'en_US.UTF-8' ]; then
+if [ x$LANG = 'xen_US.UTF-8' ]; then
 	export PS1='`ret=$?; if [ $ret -ne 0 ];then echo "\[\e[31m\]error code: $ret\n\[\e[0m\]"; fi`\[\e[36m\]╔════\[\e[37m\]($host)\[\e[36m\]══`for((i=0;i<$COLUMNS-39-${#host};++i));do echo -n ═;done` \[\e[1m\e[33m\]$(date +"%a %F %T")\[\e[0m\e[36m\] ════╗\n\[\e[36m\]╠\[\e[0m\]\W\$ '
 	export PS2='\[\e[36m\]╠\[\e[0m\]\W\$ '
 else

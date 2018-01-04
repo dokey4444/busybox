@@ -10,7 +10,7 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-export SYSTEM='Mac'
+export SYSTEM='Linux'
 
 # Source diy definitions
 if [ -f ~/.bashrc.inc ]; then
