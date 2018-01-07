@@ -1,0 +1,58 @@
+#!/usr/bin/expect -f
+
+#trap sigwinch spawned
+trap {
+	set rows [stty rows]
+	set cols [stty columns]
+	stty rows $rows columns $cols < $spawn_out(slave,name)
+} WINCH
+
+set machine [lindex $argv 0]
+set screen  [lindex $argv 1]
+
+set user username
+
+set password null
+switch -- $machine {
+	""       { set machine $user@hostname }
+	"d"      { set machine $user@hostname }
+	"dev"    { set machine $user@hostname }
+}
+
+switch -- $screen {
+	"n" {set screen screenname}
+}
+
+proc attach_screen { name } {
+	if {$name != ""} {
+		send "screen -x $name\n"
+		expect {
+			"no screen" {
+				send "screen -S $name\n"
+			}
+		}
+	}
+}
+
+proc login { machine password screen } {
+	send "ssh $machine\n"
+	expect {
+		"hosttag" { attach_screen $screen }
+		"password:" {
+			send "$password\n"; sleep 0.1
+			attach_screen $screen
+		}
+	}
+}
+
+set timeout 1
+spawn ssh $user@hostname
+expect {
+	"logintag" { login $machine $password $screen }
+	"password" { interact }
+}
+
+interact
+
+exit 0
+
