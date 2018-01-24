@@ -5,6 +5,9 @@ defutf8 on
 defencoding utf8
 encoding UTF-8 UTF-8
 
+# set TERM for screen ("setenv TERM screen-256color" is useless)
+term screen-256color
+
 # bind F1 to new a screen session in this terminal
 bindkey -k k5 screen
 # bind F2 to rename a screen
@@ -16,21 +19,14 @@ bindkey -k k9 next
 # bind F5 to detach
 bindkey -k k7 detach
 
-#term linux # 这个配置导致你的 F1 至 F4 被屏蔽了
-#setenv TERM linux
-#setenv LC_CTYPE zh_CN.GBK
-#use ` as the Global Key
+#use Ctrl+b as the Global Key
+#escape ^Bb
+
+# set environment veriables
+#setenv LANG zh_CN.GBK
+
 defscrollback 4096
 
 hardstatus alwayslastline
 hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{=kw}%?%-Lw%?%{r}(%{W}%n*%f %t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B}%Y-%m-%d %{W}%c %{g}]'
-
-#screen -t xuxia 1 sh ~work/xx/.bashrc
-#screen -t server       2       ssh tc-rank-con1.tc
-vbell off
-#screen bash
-#screen bash
-#screen bash
-#screen bash
-#screen bash
 
