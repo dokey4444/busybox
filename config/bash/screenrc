@@ -28,5 +28,5 @@ bindkey -k k7 detach
 defscrollback 4096
 
 hardstatus alwayslastline
-hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{=kw}%?%-Lw%?%{r}(%{W}%n*%f %t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B}%Y-%m-%d %{W}%c %{g}]'
+hardstatus string '%{= kC}[ %{G}%H %{C}][ %{K} %= %{=kw}%?%-Lw%?%{K}(%{W}%n*%f %t%?(%u)%?%{K})%{w}%?%+Lw%?%?%= %{C}][ %{Y}%Y-%m-%d%{W}%c:%s%{C} ]'
 
