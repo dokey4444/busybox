@@ -64,8 +64,8 @@ func main() {
 	fmt.Println(time.Now())
 
 	// time after click
-	var c = make(chan time.Time)
-	var m time.Time
+	var c = make(chan int)
+	var m int
 	select {
 	case m = <-c:
 		fmt.Println("never get message: ", m)
@@ -74,10 +74,46 @@ func main() {
 	}
 	close(c)
 
-	// time tick
+	// time ticker stop but not close
+	var ticker1 = time.NewTicker(time.Second)
+	go func() {
+		for time := range ticker1.C {
+			fmt.Println("go time tick1: ", time)
+		}
+		fmt.Println("go timer ticker1 finished")
+	}()
+	time.Sleep(5 * time.Second)
+	ticker1.Stop()
+	time.Sleep(1 * time.Second)
+	fmt.Println("ticker1 stoped")
+	fmt.Println()
+
+	// time ticker stop and close
+	var done = make(chan bool, 1)
+	var ticker2 = time.NewTicker(time.Second)
+	go func() {
+		for {
+			select {
+			case time := <-ticker2.C:
+				fmt.Println("go time tick2: ", time)
+			case is_done := <-done:
+				fmt.Println("go time check down: ", is_done)
+				close(done)
+				return
+			}
+		}
+	}()
+	time.Sleep(5 * time.Second)
+	ticker2.Stop()
+	done <- true
+	time.Sleep(1 * time.Second)
+	fmt.Println("ticker2 stoped")
+	fmt.Println()
+
+	// time ticker dead loop
 	var t <-chan time.Time = time.Tick(time.Second)
-	var tick time.Time
-	for tick = range t {
-		fmt.Println("time tick: ", tick)
+	var time time.Time
+	for time = range t {
+		fmt.Println("time tick: ", time)
 	}
 }
