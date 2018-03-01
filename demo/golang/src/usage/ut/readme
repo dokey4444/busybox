@@ -1,0 +1,15 @@
+# 执行所有单元测试
+go test
+
+# 执行所有压力测试
+go test -bench .
+
+# 执行指定文件的单元测试
+go test -v foo_test.go foo.go
+
+# 执行指定函数的单元测试
+go test -v -test.run Foo
+
+# 指定指定函数的压力测试
+go test -bench Foo
+
