@@ -3,6 +3,7 @@ alias vi='vim'
 alias view='vim -R'
 if [ "x$SYSTEM" == "xMac" ];then
 	alias ls='ls -G'
+	alias readlink='greadlink'
 else
 	alias ls='ls --color=auto'
 	alias lsg='ls --group-directories-first'
