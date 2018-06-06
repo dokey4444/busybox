@@ -108,6 +108,7 @@ Plugin 'VundleVim/Vundle.vim'
 
 " Plugin Package
 Plugin 'Tagbar'
+Plugin 'scrooloose/nerdtree'
 Plugin 'fatih/vim-go'
 
 " All of your Plugins must be added before the following line
@@ -124,6 +125,31 @@ filetype plugin indent on    " required
 "
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
+"
+"--------------------------------------------------------------------------
+"	NERDTree
+"--------------------------------------------------------------------------
+"""将F2设置为开关NERDTree的快捷键
+map <F2> :NERDTreeToggle<cr>
+" 修改树的显示图标
+let g:NERDTreeDirArrowExpandable = '+'
+let g:NERDTreeDirArrowCollapsible = '-'
+" 窗口位置
+let g:NERDTreeWinPos='left'
+" 窗口尺寸
+let g:NERDTreeSize=30
+" 窗口宽度
+let NERDTreeWinSize=30
+" 不显示隐藏文件
+let g:NERDTreeHidden=0
+" 打开vim时如果没有文件自动打开NERDTree
+autocmd vimenter * if !argc()|NERDTree|endif
+" 当NERDTree为剩下的唯一窗口时自动关闭
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+" 打开vim时自动打开NERDTree
+autocmd vimenter * NERDTree</cr></F2>
+" 忽略以下文件的显示
+let NERDTreeIgnore=['\.pyc','\~$','\.swp']
 
 "--------------------------------------------------------------------------
 "	Tagbar
@@ -131,9 +157,9 @@ filetype plugin indent on    " required
 "文件侦查启动,用以检测文件的后缀
 filetyp on
 "打开文件自动 打开tagbar
-autocmd BufReadPost *.cpp,*.c,*.h,*.hpp,*.cc,*.cxx,*.go call tagbar#autoopen()
+"autocmd BufReadPost *.cpp,*.c,*.h,*.hpp,*.cc,*.cxx,*.go call tagbar#autoopen()
 "映射tagbar的快捷键
-map <F2> :TagbarToggle<CR>
+map <F3> :TagbarToggle<CR>
 "设置tagbar的窗口宽度
 let g:tagbar_width=30
 "设置tagbar的窗口显示的位置,为左边
