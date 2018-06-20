@@ -93,6 +93,7 @@ nmap	<silent> <C-m>	<esc>:cw<cr>
 "	3、run :BundleClean
 "	3、run :BundleUpdate
 "	3、run :PluginInstall
+"	3、run :GoInstallBinaries
 "--------------------------------------------------------------------------
 set nocompatible              " be iMproved, required
 filetype off                  " required
@@ -143,11 +144,11 @@ let NERDTreeWinSize=30
 " 不显示隐藏文件
 let g:NERDTreeHidden=0
 " 打开vim时如果没有文件自动打开NERDTree
-autocmd vimenter * if !argc()|NERDTree|endif
+"autocmd vimenter * if !argc()|NERDTree|endif
 " 当NERDTree为剩下的唯一窗口时自动关闭
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " 打开vim时自动打开NERDTree
-autocmd vimenter * NERDTree</cr></F2>
+"autocmd vimenter * NERDTree</cr></F2>
 " 忽略以下文件的显示
 let NERDTreeIgnore=['\.pyc','\~$','\.swp']
 
