@@ -10,7 +10,13 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-export SYSTEM='Linux'
+export SYSTEM='Mac'
+export GOPATH=~/Library/Gopath
+export WORKSPACE=~/workspace
+export GOPATH=$GOPATH:$WORKSPACE/dds-inspector
+export GOPATH=$GOPATH:$WORKSPACE/influxdb
+
+export PATH=~/Library/Gopath/bin:$PATH
 
 # Source diy definitions
 if [ -f ~/.bashrc.inc ]; then
