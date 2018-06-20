@@ -69,6 +69,8 @@
 	branch = auto
 	interactive = auto
 	diff = auto
+[url "git@github.com:"]
+	insteadOf = https://github.com/
 
 # **************************************************************** #
 # **************************************************************** #
