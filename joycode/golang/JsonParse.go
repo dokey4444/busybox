@@ -196,9 +196,6 @@ func doParseObjectRecursion(jsonData []byte, index int, parentKey []string, call
 	keyIndex = len(parentKey)
 	keyPath = append(parentKey, "")
 
-	if err = leftTrim(); err != nil {
-		return index, err
-	}
 	if jsonData[index] == '{' {
 		index++
 		if err = leftTrim(); err != nil {

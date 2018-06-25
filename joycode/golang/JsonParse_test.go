@@ -1,9 +1,9 @@
 /*
 // =====================================================================================
 //
-//       Filename:  JsonObj.go
+//       Filename:  JsonParse.go
 //
-//    Description:
+//    Description:  JsonParse提供基础Json解析功能，外部需要配合回调函数进行使用
 //
 //        Version:  1.0
 //        Created:  06/23/2018 12:19:31 PM
@@ -19,504 +19,476 @@
 package util
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
-	"runtime"
+	"strconv"
 	"strings"
-	"testing"
+	"unicode"
 
 	"inspector/util/unsafe"
 )
 
-var jsonData string = `
-{
-	"map": {
-		"i" : 1024,
-		"f" : 3.14,
-		"bt" : true,
-		"bf" : false,
-		"n" : null,
-		"o" : {
-			"s1" : "s1",
-			"s2" : "s2",
-			"s3" : "s3",
-			"s4" : "s4"
-		},
-		"l" : [1, 2, 3, 4, 5]
-	},
-	"list" : [
-		1024, 3.14, true, false, null, {
-			"s1" : "s1",
-			"s2" : "s2",
-			"s3" : "s3",
-			"s4" : "s4"	
-		},
-		[1, 2, 3, 4, 5]
-	]
-}
-`
+type JsonValueType int
 
-var jsonIterLargeFile string = `
-[{
-	"person": {
-		"id": "d50887ca-a6ce-4e59-b89f-14f0b5d03b03",
-		"name": {
-			"fullName": "Leonid Bugaev",
-			"givenName": "Leonid",
-			"familyName": "Bugaev"
-		},
-		"email": "leonsbox@gmail.com",
-		"gender": "male",
-		"location": "Saint Petersburg, Saint Petersburg, RU",
-		"geo": {
-			"city": "Saint Petersburg",
-			"state": "Saint Petersburg",
-			"country": "Russia",
-			"lat": 59.9342802,
-			"lng": 30.3350986
-		},
-		"bio": "Senior engineer at Granify.com",
-		"site": "http://flickfaver.com",
-		"avatar": "https://d1ts43dypk8bqh.cloudfront.net/v1/avatars/d50887ca-a6ce-4e59-b89f-14f0b5d03b03",
-		"employment": {
-			"name": "www.latera.ru",
-			"title": "Software Engineer",
-			"domain": "gmail.com"
-		},
-		"facebook": {
-			"handle": "leonid.bugaev"
-		},
-		"github": {
-			"handle": "buger",
-			"id": 14009,
-			"avatar": "https://avatars.githubusercontent.com/u/14009?v=3",
-			"company": "Granify",
-			"blog": "http://leonsbox.com",
-			"followers": 95,
-			"following": 10
-		},
-		"twitter": {
-			"handle": "flickfaver",
-			"id": 77004410,
-			"bio": null,
-			"followers": 2,
-			"following": 1,
-			"statuses": 5,
-			"favorites": 0,
-			"location": "",
-			"site": "http://flickfaver.com",
-			"avatar": null
-		},
-		"linkedin": {
-			"handle": "in/leonidbugaev"
-		},
-		"googleplus": {
-			"handle": null
-		},
-		"angellist": {
-			"handle": "leonid-bugaev",
-			"id": 61541,
-			"bio": "Senior engineer at Granify.com",
-			"blog": "http://buger.github.com",
-			"site": "http://buger.github.com",
-			"followers": 41,
-			"avatar": "https://d1qb2nb5cznatu.cloudfront.net/users/61541-medium_jpg?1405474390"
-		},
-		"klout": {
-			"handle": null,
-			"score": null
-		},
-		"foursquare": {
-			"handle": null
-		},
-		"aboutme": {
-			"handle": "leonid.bugaev",
-			"bio": null,
-			"avatar": null
-		},
-		"gravatar": {
-			"handle": "buger",
-			"urls": [
-			],
-			"avatar": "http://1.gravatar.com/avatar/f7c8edd577d13b8930d5522f28123510",
-			"avatars": [
-			{
-				"url": "http://1.gravatar.com/avatar/f7c8edd577d13b8930d5522f28123510",
-				"type": "thumbnail"
-			}
-			]
-		},
-		"fuzzy": false
-	},
-	"company": "hello"
-}]
-`
+const STRING JsonValueType = 0
+const INTEGER JsonValueType = 1
+const FLOAT JsonValueType = 2
+const BOOL JsonValueType = 3
+const NULL JsonValueType = 4
+const OBJECT JsonValueType = 5
+const ARRAY JsonValueType = 6
+const UNKNOWN JsonValueType = 7
 
-func TestJsonParse(t *testing.T) {
-	check := func(statement bool, msg string) {
-		var line int
-		_, _, line, _ = runtime.Caller(1)
-		if statement == false {
-			t.Error(fmt.Sprintf("line[%d] msg: %s\n", line, msg))
-		}
+/*
+// ===  FUNCTION  ======================================================================
+//         Name:  JsonParseCallBack
+//  Description:  Json解析的回调函数（顶层元素parentKey为空字符串）
+// =====================================================================================
+*/
+type JsonParseCallBack func(keyPath []string, value []byte, valueType JsonValueType) error
+
+/*
+// ===  FUNCTION  ======================================================================
+//         Name:  parseKey
+//  Description:  解析Key，目前暂不支持解析带有转义字符的key
+// =====================================================================================
+*/
+func parseKey(jsonData []byte, index int) (string, int, error) {
+	// 跳过前双引号
+	index++
+
+	idx := bytes.IndexByte(jsonData[index:], byte('"'))
+	if idx == -1 {
+		return "", -1, errors.New(fmt.Sprintf("invalid json: can't find paired quotes of key at offset[%d]", index))
 	}
+	key := unsafe.Bytes2String(jsonData[index : index+idx])
+	index += idx
+
+	// 跳过后双引号
+	index++
+
+	return key, index, nil
+}
+
+/*
+// ===  FUNCTION  ======================================================================
+//         Name:  parseValue
+//  Description:  解析简单Value，目前暂不支持科学记数法和转义字符，也不对数字的合法性进行验证
+//                如果遇到OBJECT或ARRAY类型，不解析直接返回
+// =====================================================================================
+*/
+func parseValue(jsonData []byte, index int) ([]byte, JsonValueType, int, error) {
+	switch jsonData[index] {
+	// case STRING
+	case '"':
+		index++ // 跳过前双引号
+		idx := bytes.IndexByte(jsonData[index:], byte('"'))
+		if idx == -1 {
+			return nil, UNKNOWN, -1, errors.New(fmt.Sprintf("invalid json: can't find paired quotes of value at offset[%d]", index))
+		}
+		value := jsonData[index : index+idx]
+		index += idx
+		index++ // 跳过后双引号
+
+		return value, STRING, index, nil
+
+	// case INTEGER or FLOAT
+	case '-':
+		fallthrough
+	case '0':
+		fallthrough
+	case '1':
+		fallthrough
+	case '2':
+		fallthrough
+	case '3':
+		fallthrough
+	case '4':
+		fallthrough
+	case '5':
+		fallthrough
+	case '6':
+		fallthrough
+	case '7':
+		fallthrough
+	case '8':
+		fallthrough
+	case '9':
+		var value []byte
+		valueType := INTEGER
+		head := index
+		index++ // 跳过首字符
+		for index < len(jsonData) {
+			if jsonData[index] >= '0' && jsonData[index] <= '9' {
+				index++
+			} else if jsonData[index] == '.' {
+				valueType = FLOAT
+				index++
+			} else {
+				value = jsonData[head:index]
+				break
+			}
+		}
+		return value, valueType, index, nil
+
+	// case OBJECT
+	case '{':
+		return nil, OBJECT, index, nil
+	// case ARRAY
+	case '[':
+		return nil, ARRAY, index, nil
+	// case BOOL
+	case 't':
+		if index+4 > len(jsonData) ||
+			bytes.Compare(jsonData[index:index+4], []byte{'t', 'r', 'u', 'e'}) != 0 {
+			return nil, UNKNOWN, index, errors.New(fmt.Sprintf("invalid json: expect bool[true] at offset[%d]", index))
+		}
+		return jsonData[index : index+4], BOOL, index + 4, nil
+	case 'f':
+		if index+5 > len(jsonData) ||
+			bytes.Compare(jsonData[index:index+5], []byte{'f', 'a', 'l', 's', 'e'}) != 0 {
+			return nil, UNKNOWN, index, errors.New(fmt.Sprintf("invalid json: expect bool[false] at offset[%d]", index))
+		}
+		return jsonData[index : index+5], BOOL, index + 5, nil
+	// case NULL
+	case 'n':
+		if index+4 > len(jsonData) ||
+			bytes.Compare(jsonData[index:index+4], []byte{'n', 'u', 'l', 'l'}) != 0 {
+			return nil, UNKNOWN, index, errors.New(fmt.Sprintf("invalid json: expect null at offset[%d]", index))
+		}
+		return jsonData[index : index+4], NULL, index + 4, nil
+	default:
+		return nil, UNKNOWN, index, errors.New(fmt.Sprintf("invalid json: unknown value type at offset[%d]", index))
+	}
+	panic("invalid value type")
+}
+
+/*
+// ===  FUNCTION  ======================================================================
+//         Name:  doParseObjectRecursion
+//  Description:  递归解析Object，并返回"}"下一个字符的绝对下标位置
+// =====================================================================================
+*/
+func doParseObjectRecursion(jsonData []byte, index int, parentKey []string, callback JsonParseCallBack) (int, error) {
+	var key string
+	var value []byte
+	var valueType JsonValueType
+	var keyPath []string
+	var keyIndex int
 	var err error
-	var buf strings.Builder
-	var comma bool
-	buf.WriteRune('{')
-	err = JsonParse([]byte(jsonData), func(keyPath []string, value []byte, valueType JsonValueType) error {
-		switch valueType {
-		case STRING:
-			if comma == true {
-				buf.WriteRune(',')
+
+	// 跳过左空白符，并判断是否已经结束
+	leftTrim := func() error {
+		for index < len(jsonData) {
+			if unicode.IsSpace(rune(jsonData[index])) {
+				index++
+			} else {
+				break
 			}
-			if keyPath[len(keyPath)-1][0:1] != "[" {
-				buf.WriteRune('"')
-				buf.WriteString(keyPath[len(keyPath)-1])
-				buf.WriteRune('"')
-				buf.WriteRune(':')
-			}
-			buf.WriteRune('"')
-			buf.Write(value)
-			buf.WriteRune('"')
-			comma = true
-		case INTEGER:
-			fallthrough
-		case FLOAT:
-			fallthrough
-		case BOOL:
-			fallthrough
-		case NULL:
-			if comma == true {
-				buf.WriteRune(',')
-			}
-			if keyPath[len(keyPath)-1][0:1] != "[" {
-				buf.WriteRune('"')
-				buf.WriteString(keyPath[len(keyPath)-1])
-				buf.WriteRune('"')
-				buf.WriteRune(':')
-			}
-			buf.Write(value)
-			comma = true
-		case OBJECT:
-			if value == nil { // OBJECT 开始
-				if comma == true {
-					buf.WriteRune(',')
-				}
-				if keyPath[len(keyPath)-1][0:1] != "[" {
-					buf.WriteRune('"')
-					buf.WriteString(keyPath[len(keyPath)-1])
-					buf.WriteRune('"')
-					buf.WriteRune(':')
-				}
-				buf.WriteRune('{')
-				comma = false
-			} else { // OBJECT 结束
-				buf.WriteRune('}')
-				comma = true
-			}
-		case ARRAY:
-			if value == nil { // ARRAY 开始
-				if comma == true {
-					buf.WriteRune(',')
-				}
-				if keyPath[len(keyPath)-1][0:1] != "[" {
-					buf.WriteRune('"')
-					buf.WriteString(keyPath[len(keyPath)-1])
-					buf.WriteRune('"')
-					buf.WriteRune(':')
-				}
-				buf.WriteRune('[')
-				comma = false
-			} else { // ARRAY 结束
-				buf.WriteRune(']')
-				comma = true
-			}
+		}
+		if index >= len(jsonData) {
+			return errors.New(fmt.Sprint("invalid json: unexpect end"))
 		}
 		return nil
-	})
-	buf.WriteRune('}')
-	jsonData = strings.Replace(jsonData, " ", "", -1)
-	jsonData = strings.Replace(jsonData, "\t", "", -1)
-	jsonData = strings.Replace(jsonData, "\n", "", -1)
-	check(jsonData == buf.String(), "test")
-	check(err == nil, "test")
-	check(true, "test")
+	}
+
+	keyIndex = len(parentKey)
+	keyPath = append(parentKey, "")
+
+	if jsonData[index] == '{' {
+		index++
+		if err = leftTrim(); err != nil {
+			return index, errors.New(fmt.Sprintf("%s: expect valid key or \"}\" at offset[%d]", err.Error(), index))
+		}
+		if jsonData[index] == '}' {
+			return index + 1, nil
+		}
+		for index < len(jsonData) {
+			// find key
+			if err = leftTrim(); err != nil {
+				return index, errors.New(fmt.Sprintf("%s: expect valid key or \"}\" at offset[%d]", err.Error(), index))
+			}
+			if jsonData[index] == '"' {
+				var idx int
+
+				// parse key
+				if key, index, err = parseKey(jsonData, index); err != nil {
+					return index, err
+				}
+				keyPath[keyIndex] = key
+
+				// parse value
+				if err = leftTrim(); err != nil {
+					return index, errors.New(fmt.Sprintf("%s: expect \":\" at offset[%d]", err.Error(), index))
+				}
+				if jsonData[index] == ':' {
+					index++
+				} else {
+					return index, errors.New(fmt.Sprintf("invalid json: expect \":\" at offset[%d]", index))
+				}
+				if err = leftTrim(); err != nil {
+					return index, errors.New(fmt.Sprintf("%s: expect value at offset[%d]", err.Error(), index))
+				}
+				if value, valueType, index, err = parseValue(jsonData, index); err != nil {
+					return index, err
+				}
+				switch valueType {
+				case STRING:
+					fallthrough
+				case INTEGER:
+					fallthrough
+				case FLOAT:
+					fallthrough
+				case BOOL:
+					fallthrough
+				case NULL:
+					if err = callback(keyPath, value, valueType); err != nil {
+						return index, err
+					}
+				case OBJECT:
+					// 递归之前先做一次回调，但由于value尚未解析完成，所以返回nil
+					if err = callback(keyPath, nil, valueType); err != nil {
+						return index, err
+					}
+					// 递归解析子Object
+					if idx, err = doParseObjectRecursion(jsonData, index, keyPath, callback); err != nil {
+						return index, err
+					}
+					value = jsonData[index:idx]
+					// 递归之后再做一次回调，此时value已经解析完成，明确的知道value的内容
+					if err = callback(keyPath, value, valueType); err != nil {
+						return index, err
+					}
+					index = idx
+				case ARRAY:
+					// 递归之前先做一次回调，但由于value尚未解析完成，所以返回nil
+					if err = callback(keyPath, nil, valueType); err != nil {
+						return index, err
+					}
+					// 递归解析子Array
+					if idx, err = doParseArrayRecursion(jsonData, index, keyPath, callback); err != nil {
+						return index, err
+					}
+					// 递归之后再做一次回调，此时value已经解析完成，明确的知道value的内容
+					value = jsonData[index:idx]
+					if err = callback(keyPath, value, valueType); err != nil {
+						return index, err
+					}
+					index = idx
+				case UNKNOWN:
+					return index, errors.New(fmt.Sprintf("invalid json: unknown value type at offset[%d]", index))
+				default:
+					panic("invalid value type")
+				}
+
+				// find next
+				if err = leftTrim(); err != nil {
+					return index, errors.New(fmt.Sprintf("%s: expect \",\" or \"}\" at offset[%d]", err.Error(), index))
+				}
+				if jsonData[index] == ',' {
+					index++
+				} else if jsonData[index] == '}' {
+					index++
+					break
+				} else {
+					return index, errors.New(fmt.Sprintf("invalid json: expect \",\" or \"}\" at offset[%d]", index))
+				}
+			} else {
+				return index, errors.New(fmt.Sprintf("invalid json: expect valid key at offset[%d]", index))
+			}
+		}
+		if index >= len(jsonData) && jsonData[len(jsonData)-1] != '}' {
+			return index, errors.New(fmt.Sprintf("invalid json: expect valid key or \"}\" at offset[%d]", index))
+		}
+	} else {
+		return index, errors.New(fmt.Sprintf("invalid json: expect \"{\" at offset[%d]", index))
+	}
+	return index, nil
 }
 
-func TestJsonParseJsonIterLargeFile(t *testing.T) {
-	check := func(statement bool, msg string) {
-		var line int
-		_, _, line, _ = runtime.Caller(1)
-		if statement == false {
-			t.Error(fmt.Sprintf("line[%d] msg: %s\n", line, msg))
-		}
-	}
-	var err error
+/*
+// ===  FUNCTION  ======================================================================
+//         Name:  doParseArrayRecursion
+//  Description:  递归解析Array，并返回"}"下一个字符的绝对下标位置
+// =====================================================================================
+*/
+func doParseArrayRecursion(jsonData []byte, index int, parentKey []string, callback JsonParseCallBack) (int, error) {
+	var key string
+	var value []byte
+	var valueType JsonValueType
+	var keyPath []string
+	var keyIndex int
 	var buf strings.Builder
-	var comma bool
-	buf.WriteRune('[')
-	err = JsonParse([]byte(jsonIterLargeFile), func(keyPath []string, value []byte, valueType JsonValueType) error {
-		switch valueType {
-		case STRING:
-			if comma == true {
-				buf.WriteRune(',')
+	var err error
+
+	// 跳过左空白符
+	leftTrim := func() error {
+		for index < len(jsonData) {
+			if unicode.IsSpace(rune(jsonData[index])) {
+				index++
+			} else {
+				break
 			}
-			if keyPath[len(keyPath)-1][0:1] != "[" {
-				buf.WriteRune('"')
-				buf.WriteString(keyPath[len(keyPath)-1])
-				buf.WriteRune('"')
-				buf.WriteRune(':')
-			}
-			buf.WriteRune('"')
-			buf.Write(value)
-			buf.WriteRune('"')
-			comma = true
-		case INTEGER:
-			fallthrough
-		case FLOAT:
-			fallthrough
-		case BOOL:
-			fallthrough
-		case NULL:
-			if comma == true {
-				buf.WriteRune(',')
-			}
-			if keyPath[len(keyPath)-1][0:1] != "[" {
-				buf.WriteRune('"')
-				buf.WriteString(keyPath[len(keyPath)-1])
-				buf.WriteRune('"')
-				buf.WriteRune(':')
-			}
-			buf.Write(value)
-			comma = true
-		case OBJECT:
-			if value == nil { // OBJECT 开始
-				if comma == true {
-					buf.WriteRune(',')
-				}
-				if keyPath[len(keyPath)-1][0:1] != "[" {
-					buf.WriteRune('"')
-					buf.WriteString(keyPath[len(keyPath)-1])
-					buf.WriteRune('"')
-					buf.WriteRune(':')
-				}
-				buf.WriteRune('{')
-				comma = false
-			} else { // OBJECT 结束
-				buf.WriteRune('}')
-				comma = true
-			}
-		case ARRAY:
-			if value == nil { // ARRAY 开始
-				if comma == true {
-					buf.WriteRune(',')
-				}
-				if keyPath[len(keyPath)-1][0:1] != "[" {
-					buf.WriteRune('"')
-					buf.WriteString(keyPath[len(keyPath)-1])
-					buf.WriteRune('"')
-					buf.WriteRune(':')
-				}
-				buf.WriteRune('[')
-				comma = false
-			} else { // ARRAY 结束
-				buf.WriteRune(']')
-				comma = true
-			}
+		}
+		if index >= len(jsonData) {
+			return errors.New(fmt.Sprint("invalid json: unexpect end"))
 		}
 		return nil
-	})
-	buf.WriteRune(']')
-	jsonIterLargeFile = strings.Replace(jsonIterLargeFile, " ", "", -1)
-	jsonIterLargeFile = strings.Replace(jsonIterLargeFile, "\t", "", -1)
-	jsonIterLargeFile = strings.Replace(jsonIterLargeFile, "\n", "", -1)
-	checkString := buf.String()
-	checkString = strings.Replace(checkString, " ", "", -1)
-	checkString = strings.Replace(checkString, "\t", "", -1)
-	checkString = strings.Replace(checkString, "\n", "", -1)
-	check(jsonIterLargeFile == checkString, "test")
-	check(err == nil, "test")
-	check(true, "test")
+	}
+
+	keyIndex = len(parentKey)
+	keyPath = append(parentKey, "")
+	buf.Grow(8) // set cap
+
+	if jsonData[index] == '[' {
+		index++
+		var count int = 0
+
+		if err = leftTrim(); err != nil {
+			return index, errors.New(fmt.Sprintf("%s: expect valid value of \"]\" at offset[%d]", err.Error(), index))
+		}
+		if jsonData[index] == ']' {
+			return index + 1, nil
+		}
+
+		// parse array
+		for index < len(jsonData) {
+			var idx int
+
+			// create key
+			buf.Reset()
+			buf.WriteRune('[')
+			buf.WriteString(strconv.Itoa(count))
+			buf.WriteRune(']')
+			key = buf.String()
+			keyPath[keyIndex] = key
+
+			// parse value
+			if err = leftTrim(); err != nil {
+				return index, errors.New(fmt.Sprintf("%s: expect valid value at offset[%d]", err.Error(), index))
+			}
+			if value, valueType, index, err = parseValue(jsonData, index); err != nil {
+				return index, err
+			}
+			switch valueType {
+			case STRING:
+				fallthrough
+			case INTEGER:
+				fallthrough
+			case FLOAT:
+				fallthrough
+			case BOOL:
+				fallthrough
+			case NULL:
+				if err = callback(keyPath, value, valueType); err != nil {
+					return index, err
+				}
+			case OBJECT:
+				// 递归之前先做一次回调，但由于value尚未解析完成，所以返回nil
+				if err = callback(keyPath, nil, valueType); err != nil {
+					return index, err
+				}
+				// 递归解析子Object
+				if idx, err = doParseObjectRecursion(jsonData, index, keyPath, callback); err != nil {
+					return index, err
+				}
+				value = jsonData[index:idx]
+				// 递归之后再做一次回调，此时value已经解析完成，明确的知道value的内容
+				if err = callback(keyPath, value, valueType); err != nil {
+					return index, err
+				}
+				index = idx
+			case ARRAY:
+				// 递归之前先做一次回调，但由于value尚未解析完成，所以返回nil
+				if err = callback(keyPath, nil, valueType); err != nil {
+					return index, err
+				}
+				// 递归解析子Array
+				if idx, err = doParseArrayRecursion(jsonData, index, keyPath, callback); err != nil {
+					return index, err
+				}
+				// 递归之后再做一次回调，此时value已经解析完成，明确的知道value的内容
+				value = jsonData[index:idx]
+				if err = callback(keyPath, value, valueType); err != nil {
+					return index, err
+				}
+				index = idx
+			case UNKNOWN:
+				return index, errors.New(fmt.Sprintf("invalid json: unknown value type at offset[%d]", index))
+			default:
+				panic("invalid value type")
+			}
+
+			// find next
+			if err = leftTrim(); err != nil {
+				return index, errors.New(fmt.Sprintf("%s: expect \",\" or \"]\" at offset[%d]", err.Error(), index))
+			}
+			if jsonData[index] == ',' {
+				index++
+				count++
+			} else if jsonData[index] == ']' {
+				index++
+				break
+			} else {
+				return index, errors.New(fmt.Sprintf("invalid json: expect \",\" or \"]\" at offset[%d]", index))
+			}
+		}
+		if index >= len(jsonData) && jsonData[len(jsonData)-1] != ']' {
+			return index, errors.New(fmt.Sprintf("invalid json: expect valid value at offset[%d]", index))
+		}
+	} else {
+		return index, errors.New(fmt.Sprintf("invalid json: expect \"[\" at offset[%d]", index))
+	}
+	return index, nil
 }
 
-func TestJsonParseInvalid(t *testing.T) {
-	return
-	check := func(statement bool, msg string) {
-		var line int
-		_, _, line, _ = runtime.Caller(1)
-		if statement == false {
-			t.Error(fmt.Sprintf("line[%d] msg: %s\n", line, msg))
+/*
+// ===  FUNCTION  ======================================================================
+//         Name:  JsonParse
+//  Description:  Json解析器，每解析到一个key（无论是否是叶子节点）都会触发回调函数
+// =====================================================================================
+*/
+func JsonParse(jsonData []byte, callback JsonParseCallBack) error {
+	var index int = 0
+	var err error
+	var path []string
+
+	// 跳过左空白符
+	leftTrim := func() {
+		for index < len(jsonData) {
+			if unicode.IsSpace(rune(jsonData[index])) {
+				index++
+			} else {
+				break
+			}
 		}
 	}
-	var err error
 
-	err = JsonParse([]byte(` \t\n`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`a`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{ `), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{*`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{}{}`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{{}}`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{{},{}}`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a"`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a";`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":"1"`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":1`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":tru`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":trues`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":True`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":TRUE`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":fal`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":falses`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":False`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":FALSE`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":nul`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":nulls`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":Null`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":NULL`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":c`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":0,`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":0,}`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":0,"b":{`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`{"a":[]`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`[`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`[ `), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`["`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`["a`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`["a"`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`["a":`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`["a",`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`["a",{`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	err = JsonParse([]byte(`["a",{}`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err != nil, "test")
-
-	check(true, "test")
-}
-
-func TestJsonParseValidEmpty(t *testing.T) {
-	return
-	check := func(statement bool, msg string) {
-		var line int
-		_, _, line, _ = runtime.Caller(1)
-		if statement == false {
-			t.Error(fmt.Sprintf("line[%d] msg: %s\n", line, msg))
+	leftTrim()
+	if index < len(jsonData) {
+		path = make([]string, 0)
+		path = append(path, "")
+		switch jsonData[index] {
+		case '{':
+			index, err = doParseObjectRecursion(jsonData, index, path, callback)
+		case '[':
+			index, err = doParseArrayRecursion(jsonData, index, path, callback)
+		default:
+			return errors.New(fmt.Sprintf("invalid json: expect \"{\" or \"[\" at offset[%d]", index))
 		}
-	}
-	var err error
 
-	err = JsonParse([]byte(`{}`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err == nil, "test")
+		if err != nil {
+			return err
+		}
 
-	err = JsonParse([]byte(`{"a":[], "b":{}}`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err == nil, "test")
+		leftTrim()
+		if index != len(jsonData) {
+			return errors.New(fmt.Sprintf("json parse ok, but data not finish, invalid data at offset[%d]", index))
+		}
 
-	err = JsonParse([]byte(`[]`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err == nil, "test")
-
-	err = JsonParse([]byte(`[[], [] ,[]]`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err == nil, "test")
-
-	err = JsonParse([]byte(`[{}, [], {}]`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	check(err == nil, "test")
-
-	check(true, "test")
-}
-
-func BenchmarkJsonParse(b *testing.B) {
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		JsonParse(unsafe.String2Bytes(jsonData), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
-	}
-}
-
-func BenchmarkJsonParseJsonIterLargeFile(b *testing.B) {
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
-		JsonParse(unsafe.String2Bytes(jsonIterLargeFile), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
+		return nil
+	} else {
+		return errors.New(fmt.Sprint("invalid json: data is empty"))
 	}
 }
