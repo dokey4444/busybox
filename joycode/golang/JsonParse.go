@@ -468,7 +468,6 @@ func JsonParse(jsonData []byte, callback JsonParseCallBack) error {
 	leftTrim()
 	if index < len(jsonData) {
 		path = make([]string, 0)
-		path = append(path, "")
 		switch jsonData[index] {
 		case '{':
 			index, err = doParseObjectRecursion(jsonData, index, path, callback)
@@ -491,4 +490,40 @@ func JsonParse(jsonData []byte, callback JsonParseCallBack) error {
 	} else {
 		return errors.New(fmt.Sprint("invalid json: data is empty"))
 	}
+}
+
+/*
+// ===  FUNCTION  ======================================================================
+//         Name:  JsonGet
+//  Description:  根据json path语法，获取指定path的值
+// =====================================================================================
+*/
+func JsonGet(jsonData []byte, path ...string) ([]byte, error) {
+	var result []byte
+	var err error
+	if len(path) == 0 {
+		return jsonData, nil
+	}
+	err = JsonParse(jsonData, func(keyPath []string, value []byte, valueType JsonValueType) error {
+		if len(path) != len(keyPath) {
+			return nil
+		}
+		for i, _ := range keyPath {
+			if path[i] != keyPath[i] {
+				return nil
+			}
+		}
+		if value == nil {
+			return nil
+		}
+		result = value
+		return errors.New("found")
+	})
+	if err == nil {
+		return nil, errors.New("path not found")
+	}
+	if err.Error() == "found" {
+		return result, nil
+	}
+	return result, err
 }

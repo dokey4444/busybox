@@ -235,10 +235,11 @@ func TestJsonParse(t *testing.T) {
 		return nil
 	})
 	buf.WriteRune('}')
-	jsonData = strings.Replace(jsonData, " ", "", -1)
-	jsonData = strings.Replace(jsonData, "\t", "", -1)
-	jsonData = strings.Replace(jsonData, "\n", "", -1)
-	check(jsonData == buf.String(), "test")
+	var jsonDataTrim string = jsonData
+	jsonDataTrim = strings.Replace(jsonDataTrim, " ", "", -1)
+	jsonDataTrim = strings.Replace(jsonDataTrim, "\t", "", -1)
+	jsonDataTrim = strings.Replace(jsonDataTrim, "\n", "", -1)
+	check(jsonDataTrim == buf.String(), "test")
 	check(err == nil, "test")
 	check(true, "test")
 }
@@ -327,14 +328,15 @@ func TestJsonParseJsonIterLargeFile(t *testing.T) {
 		return nil
 	})
 	buf.WriteRune(']')
-	jsonIterLargeFile = strings.Replace(jsonIterLargeFile, " ", "", -1)
-	jsonIterLargeFile = strings.Replace(jsonIterLargeFile, "\t", "", -1)
-	jsonIterLargeFile = strings.Replace(jsonIterLargeFile, "\n", "", -1)
+	var jsonIterLargeFileTrim string = jsonIterLargeFile
+	jsonIterLargeFileTrim = strings.Replace(jsonIterLargeFileTrim, " ", "", -1)
+	jsonIterLargeFileTrim = strings.Replace(jsonIterLargeFileTrim, "\t", "", -1)
+	jsonIterLargeFileTrim = strings.Replace(jsonIterLargeFileTrim, "\n", "", -1)
 	checkString := buf.String()
 	checkString = strings.Replace(checkString, " ", "", -1)
 	checkString = strings.Replace(checkString, "\t", "", -1)
 	checkString = strings.Replace(checkString, "\n", "", -1)
-	check(jsonIterLargeFile == checkString, "test")
+	check(jsonIterLargeFileTrim == checkString, "test")
 	check(err == nil, "test")
 	check(true, "test")
 }
@@ -501,6 +503,46 @@ func TestJsonParseValidEmpty(t *testing.T) {
 
 	err = JsonParse([]byte(`[{}, [], {}]`), func(keyPath []string, value []byte, valueType JsonValueType) error { return nil })
 	check(err == nil, "test")
+
+	check(true, "test")
+}
+
+func TestJsonGet(t *testing.T) {
+	check := func(statement bool, msg string) {
+		var line int
+		_, _, line, _ = runtime.Caller(1)
+		if statement == false {
+			t.Error(fmt.Sprintf("line[%d] msg: %s\n", line, msg))
+		}
+	}
+
+	var jsonDataTrim string = jsonData
+	jsonDataTrim = strings.Replace(jsonDataTrim, " ", "", -1)
+	jsonDataTrim = strings.Replace(jsonDataTrim, "\t", "", -1)
+	jsonDataTrim = strings.Replace(jsonDataTrim, "\n", "", -1)
+
+	var value []byte
+	var err error
+
+	value, err = JsonGet([]byte(jsonDataTrim))
+	check(err == nil, "test")
+	check(string(value) == jsonDataTrim, "test")
+
+	value, err = JsonGet([]byte(jsonDataTrim), "map")
+	check(err == nil, "test")
+	check(string(value) == "{\"i\":1024,\"f\":3.14,\"bt\":true,\"bf\":false,\"n\":null,\"o\":{\"s1\":\"s1\",\"s2\":\"s2\",\"s3\":\"s3\",\"s4\":\"s4\"},\"l\":[1,2,3,4,5]}", "test")
+
+	value, err = JsonGet([]byte(jsonDataTrim), "map", "i")
+	check(err == nil, "test")
+	check(string(value) == "1024", "test")
+
+	value, err = JsonGet([]byte(jsonDataTrim), "list")
+	check(err == nil, "test")
+	check(string(value) == "[1024,3.14,true,false,null,{\"s1\":\"s1\",\"s2\":\"s2\",\"s3\":\"s3\",\"s4\":\"s4\"},[1,2,3,4,5]]", "test")
+
+	value, err = JsonGet([]byte(jsonDataTrim), "list", "[0]")
+	check(err == nil, "test")
+	check(string(value) == "1024", "test")
 
 	check(true, "test")
 }
