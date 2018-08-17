@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 echo "rm $*"
 
 files=$*
@@ -29,6 +27,13 @@ for file in $files;do
 		echo "del from:" `pwd -P $file`"/"$file | tee -a $target_dir/.rm_meta
 		mv $file $target_dir
 	else
-		echo "rm-trash: \""$files"\" No such file or directory" 
+		echo "rm-trash: \""$file"\" No such file or directory" 
 	fi
 done
+
+# link last del
+if [ -h ~/trash/last_del ]; then
+	unlink ~/trash/last_del
+fi
+ln -s $target_dir ~/trash/last_del
+
