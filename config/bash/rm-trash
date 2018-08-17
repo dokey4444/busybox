@@ -5,7 +5,7 @@ echo "rm $*"
 files=$*
 count=0
 
-nowtime=`date --date='0 days ago' "+%Y-%m-%d.%H:%M:%S"`
+nowtime=`date "+%Y-%m-%d.%H:%M:%S"`
 echo $nowtime
 
 # identify a usable path
