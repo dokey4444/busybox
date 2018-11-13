@@ -55,6 +55,8 @@
 	# --stat: 显示文件list以及每个文件的统计信息（每个文件增加了几行，删除了几行）
 	# --relative-date: 采用相对时间取代绝对时间（例如: 2 hours ago）
 	# -n: 只显示最近的n条记录
+	
+	update = remote update origin --prune # 同步远程分支列表
 [http]
 #	proxy = 127.0.0.1:8087
 	sslVerify = false
