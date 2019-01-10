@@ -11,6 +11,7 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 fi
 
 export SYSTEM='Mac'
+export LANG='en_US.UTF-8'
 export GOPATH=~/Library/Gopath
 export WORKSPACE=~/workspace
 export GOPATH=$GOPATH:$WORKSPACE/dds-inspector
